@@ -31,12 +31,10 @@ export const loadModels = (path: string): GraphQLParams => {
     Query: {},
     Mutation: {},
   }
-  console.log('path to load: ', path)
   const filenames = fs.readdirSync(path)
 
   for (const filename of filenames) {
     const modelClass = require(resolve(path, filename)).default
-    // console.log('modelClass', modelClass)
     // import schema artifacts
     schema.Types.push(modelClass.schema())
     const entryPointSchemas = modelClass.entryPointSchemas()
@@ -77,7 +75,6 @@ export const loadModels = (path: string): GraphQLParams => {
   schemaType.push('}')
   typeDefsArray.push(schemaType.join('\n'))
   const typeDefs = typeDefsArray.join('\n')
-  console.log('typeDefs', typeDefs)
   return {
     typeDefs,
     resolvers,

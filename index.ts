@@ -25,6 +25,5 @@ export const dynamo = {
 }
 
 const idxDir = fs.readdirSync(__dirname)
-console.log('lambda dir', idxDir)
 
 exports.server = lambdaServer(__dirname + '/types')

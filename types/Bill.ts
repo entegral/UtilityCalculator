@@ -9,8 +9,8 @@ class Bill extends BaseClass {
   static entryPointSchemas() {
     return {
       Query: [
-        'Bill(billType: String!, month: MonthInputs!, year: Int!): Bill',
-        'BillQuery(billType: String!, month: MonthInputs, year: Int!): [Bill]',
+        'Bill(billType: BillTypes!, month: MonthInputs!, year: Int!): Bill',
+        'BillQuery(billType: BillTypes!, month: MonthInputs, year: Int!): [Bill]',
       ],
       Mutation: [
         'Bill(method: MutationMethods!, item: BillMutateInput!): Bill',

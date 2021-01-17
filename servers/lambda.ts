@@ -2,7 +2,6 @@ import { ApolloServer } from 'apollo-server-lambda'
 import { loadModels } from '../helpers/loader'
 
 export const lambdaServer = (pathToModels: string) => {
-  console.log('[lambdaServer] pathToModels:', pathToModels)
   const { typeDefs, resolvers } = loadModels(pathToModels)
 
   const validate = (handler: any, event: any, context: any, callback: any) => {
