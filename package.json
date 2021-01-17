@@ -1,0 +1,56 @@
+{
+  "name": "utility-helper",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive --exit",
+    "fix": "prettier -w . && git add .",
+    "build": "tsc",
+    "local": "ts-node servers/local",
+    "watch": "mocha --recursive -w",
+    "dev": "serverless deploy --stage dev",
+    "check": "nyc --reporter=text --reporter=lcov --reporter=html --check-coverage npm run test"
+  },
+  "author": "Robert Bruce",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server-lambda": "^2.19.0",
+    "apollo-server": "^2.19.0",
+    "aws-sdk": "^2.688.0",
+    "debug": "^4.1.1",
+    "durp": "0.0.5",
+    "graphql": "^15.0.0",
+    "graphql-fields": "^2.0.3"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.5",
+    "minimist": "^1.2.5",
+    "mocha": "^7.2.0",
+    "nyc": "^15.1.0",
+    "pre-commit": "^1.2.2",
+    "prettier": "^2.1.2",
+    "rewire": "^5.0.0",
+    "serverless-deployment-bucket": "^1.2.0",
+    "serverless-localstack": "^0.4.24",
+    "serverless-plugin-typescript": "^1.1.9",
+    "sinon": "^9.0.2",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.5",
+    "yaml": "^1.9.2"
+  },
+  "pre-commit": [
+    "fix"
+  ],
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "nyc": {
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100
+  }
+}

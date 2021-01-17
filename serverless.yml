@@ -1,0 +1,80 @@
+service: ${env:SERVICE_NAME}
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  logs:
+    httpApi: ${env:API_LOGS, false}
+  region: ${env:AWS_REGION, 'us-west-2'}
+  memorySize: 128
+  timeout: 15
+  deploymentBucket:
+    serverSideEncryption: AES256
+    blockPublicAccess: true
+  environment:
+    DEBUG: ${env:DEBUG, 'mega-graph:startup,mega-graph:dynamo,mega-graph:request'}
+    TABLENAME: ${env:CUSTOMER_ID}-${self:service}
+    X_API_KEY: ${env:X_API_KEY}
+    CUSTOMER_ID: ${env:CUSTOMER_ID}
+  httpApi:
+    name: ${self:service}-${self:provider.stage}
+    cors: ${env:ENABLE_CORS, 'false'}
+    payload: '1.0'
+
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'dynamodb:GetItem'
+        - 'dynamodb:BatchGetItem'
+        - 'dynamodb:PutItem'
+        - 'dynamodb:BatchPutItem'
+        - 'dynamodb:UpdateItem'
+        - 'dynamodb:DeleteItem'
+      Resource:
+        Fn::GetAtt:
+          - megatable
+          - Arn
+
+package:
+  exclude:
+    - local/
+    - test/**/*
+    - .envrc
+    - .nyc*
+    - coverage
+
+functions:
+  graphql:
+    handler: index.server
+    events:
+      - httpApi:
+          path: /${env:API_PATH}
+          method: post
+      - httpApi:
+          path: /${env:API_PATH}
+          method: get
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-deployment-bucket
+
+resources:
+  Resources:
+    megatable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${env:CUSTOMER_ID}-${self:service}
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
