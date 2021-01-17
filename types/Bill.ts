@@ -9,13 +9,13 @@ class Bill extends BaseClass {
   static entryPointSchemas() {
     return {
       Query: [
-        'Bill(company: String!, month: Int!, year: Int!): Bill',
-        'BillQuery(company: String!, month: Int, year: Int): [Bill]',
+        'Bill(billType: String!, month: MonthInputs!, year: Int!): Bill',
+        'BillQuery(billType: String!, month: MonthInputs, year: Int!): [Bill]',
       ],
       Mutation: [
-        'Bill(method: MutationMethods!, item: BillInput!): Bill',
-        'BillBatchPut(items: [BillInput!]!): [Bill]',
-        'BillBatchDelete(items: [BillInput!]!): [Bill]',
+        'Bill(method: MutationMethods!, item: BillMutateInput!): Bill',
+        'BillBatchPut(items: [BillMutateInput!]!): [Bill]',
+        'BillBatchDelete(items: [BillDeleteInput!]!): [Bill]',
       ],
     }
   }
@@ -66,22 +66,36 @@ class Bill extends BaseClass {
   static schema() {
     return `
 type Bill {
-  company: String!
+  billType: BillTypes!
   month: MonthInputs!
   year: Int!
   total: Float!
 }
 
-input BillInput {
-  company: String!
+input BillMutateInput {
+  billType: BillTypes!
   month: MonthInputs!
   year: Int!
   total: Float!
+}
+
+input BillDeleteInput {
+  billType: BillTypes!
+  month: MonthInputs!
+  year: Int!
 }
 
 enum MutationMethods {
   put
   delete
+}
+
+enum BillTypes {
+  water
+  gas
+  electric
+  internet
+  trash
 }
 
 enum MonthInputs {
@@ -121,8 +135,11 @@ input BillUpdate {
       Dec: '12',
     }
     const compositeKey = {
-      pk: `${process.env.CUSTOMER_ID} > bill > ${args.company}`,
-      sk: `year > ${args.year} > ${months[args.month]}`,
+      pk: `${process.env.CUSTOMER_ID} > bill > ${args.billType}`,
+      sk: `year > ${args.year}`,
+    }
+    if (args.month) {
+      compositeKey.sk += ` > month > ${months[args.month]}`
     }
     return compositeKey
   }

@@ -1,9 +1,12 @@
-import AWS, { DynamoDB } from 'aws-sdk'
+import AWS from 'aws-sdk'
 import debug from 'debug'
 import { assert } from '../helpers/TestHelpers'
 const dynamoLog = debug('arctica>targets>dynamo')
 const docClient = new AWS.DynamoDB.DocumentClient()
-const TableName = process.env.TABLENAME || 'MUST SET TABLENAME ENV VAR'
+const TableName =
+  process.env.TABLENAME ||
+  `${process.env.CUSTOMER_ID}-${process.env.SERVICE_NAME}` ||
+  'MUST SET TABLENAME ENV VAR'
 
 interface KeyArgs {
   id: string

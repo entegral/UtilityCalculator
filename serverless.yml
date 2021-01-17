@@ -17,6 +17,7 @@ provider:
     TABLENAME: ${env:CUSTOMER_ID}-${self:service}
     X_API_KEY: ${env:X_API_KEY}
     CUSTOMER_ID: ${env:CUSTOMER_ID}
+    SERVICE_NAME: ${env:SERVICE_NAME}
   httpApi:
     name: ${self:service}-${self:provider.stage}
     cors: ${env:ENABLE_CORS, 'false'}
