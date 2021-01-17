@@ -7,7 +7,7 @@
     "test": "mocha --recursive --exit",
     "fix": "prettier -w . && git add .",
     "build": "tsc",
-    "local": "ts-node servers/local",
+    "local": "LOCAL=true ts-node servers/local",
     "watch": "mocha --recursive -w",
     "dev": "serverless deploy --stage dev",
     "check": "nyc --reporter=text --reporter=lcov --reporter=html --check-coverage npm run test"
