@@ -7,7 +7,14 @@ export async function CalculateMonth(_: any, args: any) {
     total: 0,
   }
   if (typeof args.billTypes === 'undefined') {
-    args.billTypes = ['electric', 'gas', 'water', 'internet', 'trash']
+    args.billTypes = [
+      'electric',
+      'gas',
+      'water',
+      'internet',
+      'trash',
+      'home_insurance',
+    ]
   }
   const billTypeProms = []
   for (const type of args.billTypes) {
@@ -29,7 +36,6 @@ export async function CalculateMonth(_: any, args: any) {
   if (typeof bills.month === 'undefined') {
     return null
   }
-  console.log('monthly bills', bills)
   return bills
 }
 
@@ -79,6 +85,5 @@ export async function CalculateYear(_: any, args: any) {
     res.total += result.total
     res.months.push(result)
   }
-  console.log('annual bills', res)
   return res
 }

@@ -102,6 +102,7 @@ enum BillTypes {
   electric
   internet
   trash
+  home_insurance
 }
 
 enum MonthInputs {
@@ -129,6 +130,7 @@ type CostByTypes {
   water: Float
   internet: Float
   trash: Float
+  home_insurance: Float
 }
 
 type MonthTotalResult {
