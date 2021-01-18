@@ -75,8 +75,6 @@ class Bill extends BaseClass {
     }
   }
 
-  async CalculateMonth() {}
-
   static queryReducer(dynamoResponse: AWS.DynamoDB.DocumentClient.QueryOutput) {
     const records = []
     if (dynamoResponse.Items) {
