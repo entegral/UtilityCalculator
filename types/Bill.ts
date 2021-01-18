@@ -1,6 +1,8 @@
+import { CalculateMonth, CalculateYear } from '../helpers/CalculationHelpers'
 import { assert } from '../helpers/TestHelpers'
 import { BaseClass } from '../targets/BaseClass'
 import { bindDynamo, dynBatchWrite, dynGet, dynQuery } from '../targets/dynamo'
+
 if (!process.env.CUSTOMER_ID) {
   throw new Error('CUSTOMER_ID must be defined')
 }
@@ -12,6 +14,7 @@ class Bill extends BaseClass {
         'Bill(billType: BillTypes!, month: MonthInputs!, year: Int!): Bill',
         'BillQuery(billType: BillTypes!, month: MonthInputs, year: Int!): [Bill]',
         'CalculateMonth(month: MonthInputs!, year: Int!, billTypes: [BillTypes!]): MonthTotalResult',
+        'CalculateYear(year: Int!, billTypes: [BillTypes!]): AnnualResult',
       ],
       Mutation: [
         'Bill(method: MutationMethods!, item: BillMutateInput!): Bill',
@@ -30,7 +33,8 @@ class Bill extends BaseClass {
         BillQuery: async (_: any, args: any) => {
           return await dynQuery(Bill, args)
         },
-        CalculateMonth: Bill.CalculateMonth.bind(null),
+        CalculateMonth: CalculateMonth.bind(null),
+        CalculateYear: CalculateYear.bind(null),
       },
       Mutation: {
         Bill: async (_: any, args: any) => {
@@ -53,28 +57,6 @@ class Bill extends BaseClass {
         },
       },
     }
-  }
-
-  static async CalculateMonth(_: any, args: any) {
-    const bills: any = {
-      billTypes: {},
-      total: 0,
-    }
-    if (typeof args.billTypes === 'undefined') {
-      args.billTypes = ['electric', 'gas', 'water', 'internet', 'trash']
-    }
-    for (const type of args.billTypes) {
-      const billParam = {
-        ...args,
-        billType: type,
-      }
-      const res = await dynGet(Bill, billParam)
-      bills.billTypes[res.billType] = res.total
-    }
-    for (const billValue of Object.values(bills.billTypes)) {
-      bills.total += billValue as number
-    }
-    return bills
   }
 
   static queryReducer(dynamoResponse: AWS.DynamoDB.DocumentClient.QueryOutput) {
@@ -150,7 +132,13 @@ type CostByTypes {
 }
 
 type MonthTotalResult {
+  month: MonthInputs
   billTypes: CostByTypes
+  total: Float
+}
+
+type AnnualResult {
+  months: [MonthTotalResult]
   total: Float
 }
 `
