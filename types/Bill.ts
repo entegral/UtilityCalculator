@@ -30,27 +30,7 @@ class Bill extends BaseClass {
         BillQuery: async (_: any, args: any) => {
           return await dynQuery(Bill, args)
         },
-        CalculateMonth: async (_: any, args: any) => {
-          const bills: any = {
-            billTypes: {},
-            total: 0,
-          }
-          if (typeof args.billTypes === 'undefined') {
-            args.billTypes = ['electric', 'gas', 'water', 'internet', 'trash']
-          }
-          for (const type of args.billTypes) {
-            const billParam = {
-              ...args,
-              billType: type,
-            }
-            const res = await dynGet(Bill, billParam)
-            bills.billTypes[res.billType] = res.total
-          }
-          for (const billValue of Object.values(bills.billTypes)) {
-            bills.total += billValue as number
-          }
-          return bills
-        },
+        CalculateMonth: Bill.CalculateMonth.bind(null),
       },
       Mutation: {
         Bill: async (_: any, args: any) => {
@@ -73,6 +53,28 @@ class Bill extends BaseClass {
         },
       },
     }
+  }
+
+  static async CalculateMonth(_: any, args: any) {
+    const bills: any = {
+      billTypes: {},
+      total: 0,
+    }
+    if (typeof args.billTypes === 'undefined') {
+      args.billTypes = ['electric', 'gas', 'water', 'internet', 'trash']
+    }
+    for (const type of args.billTypes) {
+      const billParam = {
+        ...args,
+        billType: type,
+      }
+      const res = await dynGet(Bill, billParam)
+      bills.billTypes[res.billType] = res.total
+    }
+    for (const billValue of Object.values(bills.billTypes)) {
+      bills.total += billValue as number
+    }
+    return bills
   }
 
   static queryReducer(dynamoResponse: AWS.DynamoDB.DocumentClient.QueryOutput) {
