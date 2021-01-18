@@ -1,6 +1,8 @@
+import { CalculateMonth, CalculateYear } from '../helpers/CalculationHelpers'
 import { assert } from '../helpers/TestHelpers'
 import { BaseClass } from '../targets/BaseClass'
 import { bindDynamo, dynBatchWrite, dynGet, dynQuery } from '../targets/dynamo'
+
 if (!process.env.CUSTOMER_ID) {
   throw new Error('CUSTOMER_ID must be defined')
 }
@@ -11,6 +13,8 @@ class Bill extends BaseClass {
       Query: [
         'Bill(billType: BillTypes!, month: MonthInputs!, year: Int!): Bill',
         'BillQuery(billType: BillTypes!, month: MonthInputs, year: Int!): [Bill]',
+        'CalculateMonth(month: MonthInputs!, year: Int!, billTypes: [BillTypes!]): MonthTotalResult',
+        'CalculateYear(year: Int!, billTypes: [BillTypes!]): AnnualResult',
       ],
       Mutation: [
         'Bill(method: MutationMethods!, item: BillMutateInput!): Bill',
@@ -29,6 +33,8 @@ class Bill extends BaseClass {
         BillQuery: async (_: any, args: any) => {
           return await dynQuery(Bill, args)
         },
+        CalculateMonth: CalculateMonth.bind(null),
+        CalculateYear: CalculateYear.bind(null),
       },
       Mutation: {
         Bill: async (_: any, args: any) => {
@@ -96,6 +102,7 @@ enum BillTypes {
   electric
   internet
   trash
+  home_insurance
 }
 
 enum MonthInputs {
@@ -115,7 +122,28 @@ enum MonthInputs {
 
 input BillUpdate {
   total: Float!
-}`
+}
+
+type CostByTypes {
+  electric: Float
+  gas: Float
+  water: Float
+  internet: Float
+  trash: Float
+  home_insurance: Float
+}
+
+type MonthTotalResult {
+  month: MonthInputs
+  billTypes: CostByTypes
+  total: Float
+}
+
+type AnnualResult {
+  months: [MonthTotalResult]
+  total: Float
+}
+`
   }
 
   // MODEL SPECIFIC METHODS
