@@ -11,6 +11,7 @@ class Bill extends BaseClass {
       Query: [
         'Bill(billType: BillTypes!, month: MonthInputs!, year: Int!): Bill',
         'BillQuery(billType: BillTypes!, month: MonthInputs, year: Int!): [Bill]',
+        'CalculateMonth(month: MonthInputs!, year: Int!, billTypes: [BillTypes!]): MonthTotalResult',
       ],
       Mutation: [
         'Bill(method: MutationMethods!, item: BillMutateInput!): Bill',
@@ -28,6 +29,27 @@ class Bill extends BaseClass {
         },
         BillQuery: async (_: any, args: any) => {
           return await dynQuery(Bill, args)
+        },
+        CalculateMonth: async (_: any, args: any) => {
+          const bills: any = {
+            billTypes: {},
+            total: 0,
+          }
+          if (typeof args.billTypes === 'undefined') {
+            args.billTypes = ['electric', 'gas', 'water', 'internet', 'trash']
+          }
+          for (const type of args.billTypes) {
+            const billParam = {
+              ...args,
+              billType: type,
+            }
+            const res = await dynGet(Bill, billParam)
+            bills.billTypes[res.billType] = res.total
+          }
+          for (const billValue of Object.values(bills.billTypes)) {
+            bills.total += billValue as number
+          }
+          return bills
         },
       },
       Mutation: {
@@ -52,6 +74,8 @@ class Bill extends BaseClass {
       },
     }
   }
+
+  async CalculateMonth() {}
 
   static queryReducer(dynamoResponse: AWS.DynamoDB.DocumentClient.QueryOutput) {
     const records = []
@@ -115,7 +139,21 @@ enum MonthInputs {
 
 input BillUpdate {
   total: Float!
-}`
+}
+
+type CostByTypes {
+  electric: Float
+  gas: Float
+  water: Float
+  internet: Float
+  trash: Float
+}
+
+type MonthTotalResult {
+  billTypes: CostByTypes
+  total: Float
+}
+`
   }
 
   // MODEL SPECIFIC METHODS
